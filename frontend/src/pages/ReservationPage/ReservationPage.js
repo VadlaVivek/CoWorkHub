@@ -1,0 +1,170 @@
+import {
+  useLocation,
+  useNavigate
+} from "react-router-dom"
+
+import { useState } from "react"
+
+import api from "../../api/axios"
+import DashboardLayout from "../../layouts/DashboardLayout"
+
+import "./ReservationPage.css"
+
+function ReservationPage() {
+
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  const desk = location.state?.desk
+
+  const room = location.state?.room
+
+  const [form, setForm] =
+    useState({
+      reservation_date:"",
+      duration:"",
+      purpose:"",
+      attendee_count:1
+    })
+
+  const [message, setMessage] =
+    useState("")
+
+  // IMPORTANT FIX
+  if (!desk && !room) {
+    return (
+      <DashboardLayout>
+        <div className="reserve-card">
+          <h2>No Desk Selected</h2>
+          <button
+            onClick={() => navigate("/")}
+          >
+            Back
+          </button>
+        </div>
+      </DashboardLayout>
+    )
+  }
+
+  const handleChange = e => {
+    setForm({
+      ...form,
+      [e.target.name]:
+        e.target.value
+    })
+  }
+
+  const handleSubmit =
+    async e => {
+
+      e.preventDefault()
+
+      try {
+
+        await api.post(
+          "/reservations",
+          {
+            workspace_id:
+            desk?.workspace_id
+            ||
+            room?.workspace_id,
+
+          desk_id:
+            desk?.id,
+
+          room_id:
+            room?.id,
+
+          ...form
+          }
+        )
+
+        navigate("/", {
+            replace:true
+        })
+
+      } catch (err) {
+
+        setMessage(
+          err.response?.data
+          ?.message ||
+          "Booking failed"
+        )
+      }
+    }
+
+  return (
+    <DashboardLayout>
+
+      <div className="reserve-card">
+
+        <h2>
+          Reserve
+          {" "}
+          {
+            desk?.desk_name
+            ||
+            room?.room_name
+          }
+        </h2>
+
+        {message &&
+          <p>{message}</p>
+        }
+
+        <form
+          onSubmit={
+            handleSubmit
+          }
+        >
+
+          <input
+            type="date"
+            name="reservation_date"
+            onChange={
+              handleChange
+            }
+            required
+          />
+
+          <input
+            type="number"
+            name="duration"
+            placeholder="Duration (hours)"
+            onChange={
+              handleChange
+            }
+            required
+          />
+
+          <input
+            type="text"
+            name="purpose"
+            placeholder="Purpose"
+            onChange={
+              handleChange
+            }
+          />
+
+          <input
+            type="number"
+            name="attendee_count"
+            placeholder="Attendees"
+            onChange={
+              handleChange
+            }
+          />
+
+          <button>
+            Confirm Booking
+          </button>
+
+        </form>
+
+      </div>
+
+    </DashboardLayout>
+  )
+}
+
+export default ReservationPage

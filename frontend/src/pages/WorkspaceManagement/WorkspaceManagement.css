@@ -1,0 +1,76 @@
+.manage-page h2{
+  font-size:40px;
+  margin-bottom:25px;
+}
+
+.create-message{
+  text-align:center;
+  width:20%;
+  background:#992802;
+  border-radius:6px;
+  font-size:20px;
+  color:#f4f4f6;
+  margin-bottom:25px;
+}
+
+.manage-grid{
+  display:grid;
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(
+        320px,
+        1fr
+      )
+    );
+  gap:25px;
+}
+
+button{
+  cursor:pointer;
+}
+
+.manage-card{
+  background:white;
+  padding:25px;
+  border-radius:12px;
+  box-shadow:
+    0 3px 12px
+    rgba(0,0,0,.08);
+}
+
+.manage-card h3{
+  font-size:28px;
+  margin-bottom:15px;
+}
+
+.manage-card input{
+  font-size:20px;
+  width:100%;
+  padding:12px;
+  margin-bottom:12px;
+  border:1px solid #ccc;
+  border-radius:6px;
+}
+
+.manage-card button{
+  font-size:16px;
+  width:100%;
+  padding:12px;
+  background:#4f46e5;
+  color:white;
+  border:none;
+  border-radius:6px;
+}
+
+.manage-existing-column{
+  margin-bottom:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.delete-button{
+  flex-shrink:1;
+  flex-basis:80px;
+}

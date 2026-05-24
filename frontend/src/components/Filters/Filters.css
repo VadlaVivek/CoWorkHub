@@ -1,0 +1,10 @@
+.filters{
+  margin-bottom:25px;
+}
+
+.filters select{
+  font-size:20px;
+  padding:10px;
+  border-radius:6px;
+  border:1px solid #ccc;
+}

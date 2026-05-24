@@ -1,0 +1,24 @@
+.workspace-page h2{
+  font-size:40px;
+  margin-bottom:20px;
+}
+
+.desk-grid{
+  display:grid;
+  grid-template-columns:
+    repeat(
+      auto-fill,
+      minmax(
+        240px,
+        1fr
+      )
+    );
+  gap:20px;
+}
+
+.no-desks{
+  text-align:center;
+  padding: left 20px;;
+  font-size:30px;
+  color:#555;
+}
