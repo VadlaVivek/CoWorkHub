@@ -68,3 +68,25 @@ app.listen(PORT, () => {
     `Server running on ${PORT}`
   )
 })
+
+const db =
+require("./database/db")
+
+app.get(
+"/test-users",
+(req,res)=>{
+
+  db.all(
+    "SELECT id,email,role FROM users",
+    [],
+    (err,rows)=>{
+
+      if(err){
+        return res.status(500)
+        .json(err)
+      }
+
+      res.json(rows)
+    }
+  )
+})
