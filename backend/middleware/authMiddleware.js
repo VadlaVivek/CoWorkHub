@@ -1,39 +1,70 @@
 const jwt = require("jsonwebtoken")
 
-module.exports = (
-  req,
-  res,
-  next
-) => {
+module.exports =
+(roles = []) => {
 
-  const authHeader =
-    req.headers.authorization
+  return (
+    req,
+    res,
+    next
+  ) => {
 
-  if (!authHeader) {
-    return res.status(401).json({
-      message: "No token"
-    })
-  }
+    const authHeader =
+      req.headers.authorization
 
-  const token =
-    authHeader.split(" ")[1]
+    if (
+      !authHeader
+    ) {
 
-  try {
+      return res
+        .status(401)
+        .json({
+          message:
+            "No token"
+        })
+    }
 
-    const decoded =
-      jwt.verify(
-        token,
-        process.env.JWT_SECRET
-      )
+    const token =
+      authHeader.split(
+        " "
+      )[1]
 
-    req.user = decoded
+    try {
 
-    next()
+      const decoded =
+        jwt.verify(
+          token,
+          process.env.JWT_SECRET
+        )
 
-  } catch {
+      req.user =
+        decoded
 
-    return res.status(401).json({
-      message: "Invalid token"
-    })
+      if (
+        roles.length &&
+        !roles.includes(
+          decoded.role
+        )
+      ) {
+
+        return res
+          .status(403)
+          .json({
+            message:
+              "Access denied"
+          })
+      }
+
+      next()
+
+    } catch {
+
+      return res
+        .status(401)
+        .json({
+          message:
+            "Invalid token"
+        })
+    }
   }
 }
