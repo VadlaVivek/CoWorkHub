@@ -1,149 +1,211 @@
-import React, {
-  useState
-} from "react";
-
-import axios from "axios";
-
 import {
-  useNavigate,
-  useLocation
-} from "react-router-dom";
+  useEffect,
+  useState
+} from "react"
 
-import "./Confirmation.css";
+import api from "../../api/axios"
+import DashboardLayout from "../../layouts/DashboardLayout"
 
-const API =
-process.env.REACT_APP_API_URL;
+import "./Confirmation.css"
 
 function Confirmation() {
 
-  const navigate =
-  useNavigate();
+  const [reservations,
+    setReservations] =
+    useState([])
 
-  const location =
-  useLocation();
+  const [loading,
+    setLoading] =
+    useState(true)
 
-  const {
-    deskId,
-    roomId
-  } =
-  location.state || {};
+  const [page,
+    setPage] =
+    useState(1)
 
-  const [date,
-  setDate] =
-  useState("");
+  const limit = 4
 
-  const [duration,
-  setDuration] =
-  useState("");
+  useEffect(() => {
+    loadReservations()
+  }, [])
 
-  const [purpose,
-  setPurpose] =
-  useState("");
+  const loadReservations =
+    async () => {
 
-  const token =
-  localStorage.getItem(
-    "token"
-  );
+      try {
 
-  const confirmBooking =
-  async () => {
+        const res =
+          await api.get(
+            "/reservations"
+          )
 
-    if (
-      !date ||
-      !duration ||
-      !purpose
-    ) {
-      return alert(
-        "Fill all fields"
-      );
+        setReservations(
+          res.data
+        )
+
+      } catch (err) {
+
+        console.log(err)
+
+      } finally {
+
+        setLoading(false)
+      }
     }
 
-    try {
+  // PAGINATION
+  const start =
+    (page - 1) * limit
 
-      await axios.post(
-        `${API}/api/reservations`,
-        {
-          desk_id:
-            deskId,
-          room_id:
-            roomId,
-          date,
-          duration,
-          purpose
-        },
-        {
-          headers: {
-            Authorization:
-            `Bearer ${token}`
-          }
-        }
-      );
-
-      alert(
-        "Reservation Confirmed"
-      );
-
-      navigate(
-        "/reservations"
-      );
-
-    } catch (err) {
-
-      alert(
-        err.response
-          ?.data
-          ?.message ||
-        "Reservation failed"
-      );
-    }
-  };
+  const paginated =
+    reservations.slice(
+      start,
+      start + limit
+    )
 
   return (
-    <div className="confirmation-container">
-      <div className="confirmation-card">
+    <DashboardLayout>
 
-        <h1>
-          Reserve Space
-        </h1>
+      <div
+        className="history-page"
+      >
 
-        <input
-          type="date"
-          onChange={(e)=>
-            setDate(
-              e.target.value
-            )
-          }
-        />
+        <div className="history-header">
 
-        <input
-          placeholder="Duration"
-          onChange={(e)=>
-            setDuration(
-              e.target.value
-            )
-          }
-        />
+          <h2>
+            My Reservations
+          </h2>
 
-        <input
-          placeholder="Purpose"
-          onChange={(e)=>
-            setPurpose(
-              e.target.value
-            )
-          }
-        />
+          <div className="history-count">
+            {reservations.length}
+            {" "}
+            Bookings
+          </div>
 
-        <button
-          onClick={
-            confirmBooking
-          }
-        >
-          Confirm Booking
-        </button>
+        </div>
+
+        {loading ? (
+
+          <p>
+            Loading...
+          </p>
+
+        ) : reservations.length === 0 ? (
+
+          <p>
+            No reservations found
+          </p>
+
+        ) : (
+
+          <>
+            <div
+              className="history-grid"
+            >
+
+              {paginated.map(
+                item => (
+
+                  <div
+                    key={item.id}
+                    className="history-card"
+                  >
+
+                    <h3>
+                      {
+                        item.desk_name
+                        ||
+                        item.room_name
+                      }
+                    </h3>
+
+                    <p>
+                      Date:
+                      {" "}
+                      {
+                        item.reservation_date
+                      }
+                    </p>
+
+                    <p>
+                      Duration:
+                      {" "}
+                      {
+                        item.duration
+                      }
+                      hr
+                    </p>
+
+                    <p>
+                      Purpose:
+                      {" "}
+                      {
+                        item.purpose
+                      }
+                    </p>
+
+                    <p
+                      className={
+                        "status "
+                        +
+                        item.status
+                      }
+                    >
+                      {
+                        item.status
+                      }
+                    </p>
+
+                  </div>
+                )
+              )}
+
+            </div>
+
+            {/* PAGINATION */}
+
+            <div className="pagination">
+
+              <button
+                disabled={
+                  page === 1
+                }
+                onClick={() =>
+                  setPage(
+                    page - 1
+                  )
+                }
+              >
+                Prev
+              </button>
+
+              <span>
+                Page {page}
+              </span>
+
+              <button
+                disabled={
+                  start + limit
+                  >=
+                  reservations.length
+                }
+                onClick={() =>
+                  setPage(
+                    page + 1
+                  )
+                }
+              >
+                Next
+              </button>
+
+            </div>
+
+          </>
+        )}
 
       </div>
-    </div>
-  );
+
+    </DashboardLayout>
+  )
 }
 
-export default Confirmation;
+export default Confirmation
