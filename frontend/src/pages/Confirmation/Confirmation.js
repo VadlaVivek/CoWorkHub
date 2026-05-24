@@ -1,211 +1,149 @@
-import {
-  useEffect,
+import React, {
   useState
-} from "react"
+} from "react";
 
-import api from "../../api/axios"
-import DashboardLayout from "../../layouts/DashboardLayout"
+import axios from "axios";
 
-import "./Confirmation.css"
+import {
+  useNavigate,
+  useLocation
+} from "react-router-dom";
+
+import "./Confirmation.css";
+
+const API =
+process.env.REACT_APP_API_URL;
 
 function Confirmation() {
 
-  const [reservations,
-    setReservations] =
-    useState([])
+  const navigate =
+  useNavigate();
 
-  const [loading,
-    setLoading] =
-    useState(true)
+  const location =
+  useLocation();
 
-  const [page,
-    setPage] =
-    useState(1)
+  const {
+    deskId,
+    roomId
+  } =
+  location.state || {};
 
-  const limit = 4
+  const [date,
+  setDate] =
+  useState("");
 
-  useEffect(() => {
-    loadReservations()
-  }, [])
+  const [duration,
+  setDuration] =
+  useState("");
 
-  const loadReservations =
-    async () => {
+  const [purpose,
+  setPurpose] =
+  useState("");
 
-      try {
+  const token =
+  localStorage.getItem(
+    "token"
+  );
 
-        const res =
-          await api.get(
-            "/reservations"
-          )
+  const confirmBooking =
+  async () => {
 
-        setReservations(
-          res.data
-        )
-
-      } catch (err) {
-
-        console.log(err)
-
-      } finally {
-
-        setLoading(false)
-      }
+    if (
+      !date ||
+      !duration ||
+      !purpose
+    ) {
+      return alert(
+        "Fill all fields"
+      );
     }
 
-  // PAGINATION
-  const start =
-    (page - 1) * limit
+    try {
 
-  const paginated =
-    reservations.slice(
-      start,
-      start + limit
-    )
+      await axios.post(
+        `${API}/api/reservations`,
+        {
+          desk_id:
+            deskId,
+          room_id:
+            roomId,
+          date,
+          duration,
+          purpose
+        },
+        {
+          headers: {
+            Authorization:
+            `Bearer ${token}`
+          }
+        }
+      );
+
+      alert(
+        "Reservation Confirmed"
+      );
+
+      navigate(
+        "/reservations"
+      );
+
+    } catch (err) {
+
+      alert(
+        err.response
+          ?.data
+          ?.message ||
+        "Reservation failed"
+      );
+    }
+  };
 
   return (
-    <DashboardLayout>
+    <div className="confirmation-container">
+      <div className="confirmation-card">
 
-      <div
-        className="history-page"
-      >
+        <h1>
+          Reserve Space
+        </h1>
 
-        <div className="history-header">
+        <input
+          type="date"
+          onChange={(e)=>
+            setDate(
+              e.target.value
+            )
+          }
+        />
 
-          <h2>
-            My Reservations
-          </h2>
+        <input
+          placeholder="Duration"
+          onChange={(e)=>
+            setDuration(
+              e.target.value
+            )
+          }
+        />
 
-          <div className="history-count">
-            {reservations.length}
-            {" "}
-            Bookings
-          </div>
+        <input
+          placeholder="Purpose"
+          onChange={(e)=>
+            setPurpose(
+              e.target.value
+            )
+          }
+        />
 
-        </div>
-
-        {loading ? (
-
-          <p>
-            Loading...
-          </p>
-
-        ) : reservations.length === 0 ? (
-
-          <p>
-            No reservations found
-          </p>
-
-        ) : (
-
-          <>
-            <div
-              className="history-grid"
-            >
-
-              {paginated.map(
-                item => (
-
-                  <div
-                    key={item.id}
-                    className="history-card"
-                  >
-
-                    <h3>
-                      {
-                        item.desk_name
-                        ||
-                        item.room_name
-                      }
-                    </h3>
-
-                    <p>
-                      Date:
-                      {" "}
-                      {
-                        item.reservation_date
-                      }
-                    </p>
-
-                    <p>
-                      Duration:
-                      {" "}
-                      {
-                        item.duration
-                      }
-                      hr
-                    </p>
-
-                    <p>
-                      Purpose:
-                      {" "}
-                      {
-                        item.purpose
-                      }
-                    </p>
-
-                    <p
-                      className={
-                        "status "
-                        +
-                        item.status
-                      }
-                    >
-                      {
-                        item.status
-                      }
-                    </p>
-
-                  </div>
-                )
-              )}
-
-            </div>
-
-            {/* PAGINATION */}
-
-            <div className="pagination">
-
-              <button
-                disabled={
-                  page === 1
-                }
-                onClick={() =>
-                  setPage(
-                    page - 1
-                  )
-                }
-              >
-                Prev
-              </button>
-
-              <span>
-                Page {page}
-              </span>
-
-              <button
-                disabled={
-                  start + limit
-                  >=
-                  reservations.length
-                }
-                onClick={() =>
-                  setPage(
-                    page + 1
-                  )
-                }
-              >
-                Next
-              </button>
-
-            </div>
-
-          </>
-        )}
+        <button
+          onClick={
+            confirmBooking
+          }
+        >
+          Confirm Booking
+        </button>
 
       </div>
-
-    </DashboardLayout>
-  )
+    </div>
+  );
 }
 
-export default Confirmation
+export default Confirmation;
