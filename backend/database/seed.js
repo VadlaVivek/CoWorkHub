@@ -1,124 +1,77 @@
-
 const bcrypt = require("bcryptjs")
 const db = require("./db")
 
-async function seedDatabase() {
+async function seed() {
 
-  const adminPass =
-    await bcrypt.hash("admin123", 10)
+  const adminPassword =
+    await bcrypt.hash(
+      "admin123",
+      10
+    )
 
-  const staffPass =
-    await bcrypt.hash("staff123", 10)
+  const memberPassword =
+    await bcrypt.hash(
+      "member123",
+      10
+    )
 
-  const memberPass =
-    await bcrypt.hash("member123", 10)
+  const staffPassword =
+    await bcrypt.hash(
+      "staff123",
+      10
+    )
 
   db.serialize(() => {
 
-    // USERS
+    db.run(`
+      CREATE TABLE IF NOT EXISTS users(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT UNIQUE,
+        password TEXT,
+        role TEXT
+      )
+    `)
+
     db.run(`
       INSERT OR IGNORE INTO users
-      (name,email,password,role)
+      (email,password,role)
       VALUES
       (
-        'Admin User',
         'admin@test.com',
-        '${adminPass}',
+        ?,
         'admin'
       )
-    `)
+    `,
+    [adminPassword])
 
     db.run(`
       INSERT OR IGNORE INTO users
-      (name,email,password,role)
+      (email,password,role)
       VALUES
       (
-        'Staff User',
-        'staff@test.com',
-        '${staffPass}',
-        'staff'
-      )
-    `)
-
-    db.run(`
-      INSERT OR IGNORE INTO users
-      (name,email,password,role)
-      VALUES
-      (
-        'Member User',
         'member@test.com',
-        '${memberPass}',
+        ?,
         'member'
       )
-    `)
-
-    // WORKSPACE
-    db.run(`
-      INSERT OR IGNORE INTO workspaces
-      (
-        name,
-        location,
-        floor,
-        pricing
-      )
-      VALUES
-      (
-        'Tech Hub',
-        'Hyderabad',
-        2,
-        500
-      )
-    `)
-
-    // DESKS
-    db.run(`
-      INSERT OR IGNORE INTO desks
-      (
-        workspace_id,
-        desk_name,
-        seating_type
-      )
-      VALUES
-      (
-        1,
-        'Desk A1',
-        'Window'
-      )
-    `)
+    `,
+    [memberPassword])
 
     db.run(`
-      INSERT OR IGNORE INTO desks
-      (
-        workspace_id,
-        desk_name,
-        seating_type
-      )
+      INSERT OR IGNORE INTO users
+      (email,password,role)
       VALUES
       (
-        1,
-        'Desk A2',
-        'Private'
+        'staff@test.com',
+        ?,
+        'staff'
       )
-    `)
+    `,
+    [staffPassword])
 
-    // ROOM
-    db.run(`
-      INSERT OR IGNORE INTO meeting_rooms
-      (
-        workspace_id,
-        room_name,
-        capacity
-      )
-      VALUES
-      (
-        1,
-        'Room Alpha',
-        8
-      )
-    `)
-
-    console.log("Seed Data Added")
+    console.log(
+      "Users seeded"
+    )
   })
 }
 
-seedDatabase()
+module.exports = seed

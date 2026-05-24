@@ -23,6 +23,9 @@ const reservationRoutes =
 const dashboardRoutes =
 require("./routes/dashboardRoutes")
 
+const seed =
+require("./database/seed")
+
 const app = express()
 
 app.use(cors())
@@ -63,11 +66,15 @@ app.get("/", (req, res) => {
 const PORT =
   process.env.PORT || 5000
 
-app.listen(PORT, () => {
-  console.log(
-    `Server running on ${PORT}`
-  )
-})
+  seed()
+
+  app.listen(
+  PORT,
+  ()=>{
+    console.log(
+      `Server running on ${PORT}`
+    )
+  })
 
 const db =
 require("./database/db")
