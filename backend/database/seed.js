@@ -4,25 +4,17 @@ const db = require("./db")
 async function seed() {
 
   const adminPassword =
-    await bcrypt.hash(
-      "admin123",
-      10
-    )
+    await bcrypt.hash("admin123",10)
 
   const memberPassword =
-    await bcrypt.hash(
-      "member123",
-      10
-    )
+    await bcrypt.hash("member123",10)
 
   const staffPassword =
-    await bcrypt.hash(
-      "staff123",
-      10
-    )
+    await bcrypt.hash("staff123",10)
 
-  db.serialize(() => {
+  db.serialize(()=>{
 
+    // USERS
     db.run(`
       CREATE TABLE IF NOT EXISTS users(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -32,77 +24,86 @@ async function seed() {
       )
     `)
 
+    // WORKSPACES
+    db.run(`
+      CREATE TABLE IF NOT EXISTS workspaces(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        location TEXT,
+        floor INTEGER,
+        pricing INTEGER
+      )
+    `)
+
+    // DESKS
+    db.run(`
+      CREATE TABLE IF NOT EXISTS desks(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        workspace_id INTEGER,
+        name TEXT,
+        type TEXT,
+        status TEXT DEFAULT 'available'
+      )
+    `)
+
+    // ROOMS
+    db.run(`
+      CREATE TABLE IF NOT EXISTS rooms(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        workspace_id INTEGER,
+        name TEXT,
+        capacity INTEGER,
+        status TEXT DEFAULT 'available'
+      )
+    `)
+
+    // RESERVATIONS
+    db.run(`
+      CREATE TABLE IF NOT EXISTS reservations(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        desk_id INTEGER,
+        room_id INTEGER,
+        date TEXT,
+        duration TEXT,
+        purpose TEXT,
+        status TEXT DEFAULT 'Reserved'
+      )
+    `)
+
+    // USERS SEED
     db.run(
-    `
-    INSERT OR IGNORE INTO users
-    (email,password,role)
-    VALUES
-    (
-    'admin@test.com',
-    ?,
-    'admin'
+      `
+      INSERT OR IGNORE INTO users
+      (email,password,role)
+      VALUES
+      ('admin@test.com',?,'admin')
+      `,
+      [adminPassword]
     )
-    `,
-    [adminPassword],
-    (err)=>{
-
-      if(err)
-        console.log(err)
-
-      else
-        console.log(
-          "Admin seeded"
-        )
-    })
 
     db.run(
-    `
-    INSERT OR IGNORE INTO users
-    (email,password,role)
-    VALUES
-    (
-    'member@test.com',
-    ?,
-    'member'
+      `
+      INSERT OR IGNORE INTO users
+      (email,password,role)
+      VALUES
+      ('member@test.com',?,'member')
+      `,
+      [memberPassword]
     )
-    `,
-    [memberPassword],
-    (err)=>{
-
-      if(err)
-        console.log(err)
-
-      else
-        console.log(
-          "Member seeded"
-        )
-    })
 
     db.run(
-    `
-    INSERT OR IGNORE INTO users
-    (email,password,role)
-    VALUES
-    (
-    'staff@test.com',
-    ?,
-    'staff'
+      `
+      INSERT OR IGNORE INTO users
+      (email,password,role)
+      VALUES
+      ('staff@test.com',?,'staff')
+      `,
+      [staffPassword]
     )
-    `,
-    [staffPassword],
-    (err)=>{
-
-      if(err)
-        console.log(err)
-
-      else
-        console.log(
-          "Staff seeded"
-        )
-    })
 
     console.log(
-      "Users seeded"
+      "Database seeded"
     )
   })
 }
