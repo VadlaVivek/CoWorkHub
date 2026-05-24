@@ -1,19 +1,23 @@
+const sqlite3 =
+require("sqlite3").verbose()
 
-const sqlite3 = require("sqlite3").verbose()
-const path = require("path")
+const path =
+require("path")
 
-const dbPath = path.join(
-  __dirname,
-  "workspace.sqlite"
-)
+const db =
+new sqlite3.Database(
+  path.join(
+    __dirname,
+    "cowork.db"
+  ),
+  (err)=>{
 
-const db = new sqlite3.Database(
-  dbPath,
-  (err) => {
-    if (err) {
-      console.log("Database Error:", err.message)
-    } else {
-      console.log("SQLite Connected")
+    if(err){
+      console.log(err)
+    }else{
+      console.log(
+        "SQLite Connected"
+      )
     }
   }
 )

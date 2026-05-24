@@ -4,41 +4,76 @@ const dotenv = require("dotenv")
 
 dotenv.config()
 
-require("./database/db")
-require("./database/schema")
+const app = express()
 
+const db = require("./database/db")
+const seed = require("./database/seed")
 
-const testRoutes =
-  require("./routes/testRoutes")
-
+// Routes
 const authRoutes =
-  require("./routes/authRoutes")
+require("./routes/authRoutes")
 
 const workspaceRoutes =
-  require("./routes/workspaceRoutes")
+require("./routes/workspaceRoutes")
 
 const reservationRoutes =
-  require("./routes/reservationRoutes")
+require("./routes/reservationRoutes")
 
 const dashboardRoutes =
 require("./routes/dashboardRoutes")
 
-const seed =
-require("./database/seed")
-
-const app = express()
-
-app.use(cors())
+// Middleware
 app.use(express.json())
 
 app.use(
-  "/api/dashboard",
-  dashboardRoutes
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "https://coworkhub-vebg.onrender.com"
+    ],
+    credentials: true
+  })
 )
 
+// Root Route
+app.get("/", (req, res) => {
+  res.json({
+    message: "API Running"
+  })
+})
+
+// Test Users Route
+app.get(
+  "/test-users",
+  (req, res) => {
+
+    db.all(
+      `
+      SELECT
+      id,
+      email,
+      role
+      FROM users
+      `,
+      [],
+      (err, rows) => {
+
+        if (err) {
+          return res
+            .status(500)
+            .json(err)
+        }
+
+        res.json(rows)
+      }
+    )
+  }
+)
+
+// API Routes
 app.use(
-  "/api/reservations",
-  reservationRoutes
+  "/api/auth",
+  authRoutes
 )
 
 app.use(
@@ -47,53 +82,35 @@ app.use(
 )
 
 app.use(
-  "/api/auth",
-  authRoutes
+  "/api/reservations",
+  reservationRoutes
 )
 
 app.use(
-  "/api/test",
-  testRoutes
+  "/api/dashboard",
+  dashboardRoutes
 )
 
-app.get("/", (req, res) => {
-  res.json({
-    message:
-      "API Running"
-  })
-})
-
+// Start Server After DB Ready
 const PORT =
-  process.env.PORT || 5000
+  process.env.PORT
+  || 5000
+
+db.serialize(() => {
+
+  console.log(
+    "Initializing DB..."
+  )
 
   seed()
 
   app.listen(
-  PORT,
-  ()=>{
-    console.log(
-      `Server running on ${PORT}`
-    )
-  })
+    PORT,
+    () => {
 
-const db =
-require("./database/db")
-
-app.get(
-"/test-users",
-(req,res)=>{
-
-  db.all(
-    "SELECT id,email,role FROM users",
-    [],
-    (err,rows)=>{
-
-      if(err){
-        return res.status(500)
-        .json(err)
-      }
-
-      res.json(rows)
+      console.log(
+        `Server running on ${PORT}`
+      )
     }
   )
 })

@@ -32,41 +32,74 @@ async function seed() {
       )
     `)
 
-    db.run(`
-      INSERT OR IGNORE INTO users
-      (email,password,role)
-      VALUES
-      (
-        'admin@test.com',
-        ?,
-        'admin'
-      )
+    db.run(
+    `
+    INSERT OR IGNORE INTO users
+    (email,password,role)
+    VALUES
+    (
+    'admin@test.com',
+    ?,
+    'admin'
+    )
     `,
-    [adminPassword])
+    [adminPassword],
+    (err)=>{
 
-    db.run(`
-      INSERT OR IGNORE INTO users
-      (email,password,role)
-      VALUES
-      (
-        'member@test.com',
-        ?,
-        'member'
-      )
-    `,
-    [memberPassword])
+      if(err)
+        console.log(err)
 
-    db.run(`
-      INSERT OR IGNORE INTO users
-      (email,password,role)
-      VALUES
-      (
-        'staff@test.com',
-        ?,
-        'staff'
-      )
+      else
+        console.log(
+          "Admin seeded"
+        )
+    })
+
+    db.run(
+    `
+    INSERT OR IGNORE INTO users
+    (email,password,role)
+    VALUES
+    (
+    'member@test.com',
+    ?,
+    'member'
+    )
     `,
-    [staffPassword])
+    [memberPassword],
+    (err)=>{
+
+      if(err)
+        console.log(err)
+
+      else
+        console.log(
+          "Member seeded"
+        )
+    })
+
+    db.run(
+    `
+    INSERT OR IGNORE INTO users
+    (email,password,role)
+    VALUES
+    (
+    'staff@test.com',
+    ?,
+    'staff'
+    )
+    `,
+    [staffPassword],
+    (err)=>{
+
+      if(err)
+        console.log(err)
+
+      else
+        console.log(
+          "Staff seeded"
+        )
+    })
 
     console.log(
       "Users seeded"
