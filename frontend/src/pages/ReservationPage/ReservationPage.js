@@ -54,44 +54,53 @@ function ReservationPage() {
     })
   }
 
-  const handleSubmit =
-    async e => {
+  const handleSubmit = async (e) => {
+  e.preventDefault();
 
-      e.preventDefault()
+  console.log("Submitting reservation");
 
-      try {
+  const payload = {
+    workspace_id:
+      desk?.workspace_id ||
+      room?.workspace_id,
 
-        await api.post(
-          "/reservations",
-          {
-            workspace_id:
-            desk?.workspace_id
-            ||
-            room?.workspace_id,
+    desk_id: desk?.id || null,
 
-          desk_id:
-            desk?.id,
+    room_id: room?.id || null,
 
-          room_id:
-            room?.id,
+    ...form
+  };
 
-          ...form
-          }
-        )
+  console.log(payload);
 
-        navigate("/", {
-            replace:true
-        })
+  try {
 
-      } catch (err) {
+    const res = await api.post(
+      "/reservations",
+      payload
+    );
 
-        setMessage(
-          err.response?.data
-          ?.message ||
-          "Booking failed"
-        )
-      }
-    }
+    console.log("SUCCESS", res.data);
+
+    alert("Reservation Created Successfully");
+
+    navigate("/reservations");
+
+  } catch (err) {
+
+    console.log("ERROR", err);
+
+    alert(
+      err.response?.data?.message ||
+      err.message
+    );
+
+    setMessage(
+      err.response?.data?.message ||
+      "Booking failed"
+    );
+  }
+};
 
   return (
     <DashboardLayout>
