@@ -30,12 +30,11 @@ function WorkspaceManagement() {
       pricing:""
     })
 
-  const [desk,setDesk]=
-    useState({
-      workspace_id:"",
-      desk_name:"",
-      seating_type:""
-    })
+  const [desk, setDesk] = useState({
+  workspace_id: "",
+  name: "",
+  type: ""
+});
 
   const [room,setRoom]=
     useState({
@@ -121,32 +120,27 @@ function WorkspaceManagement() {
       }
     }
 
-  const createDesk =
-    async e=>{
+  const createDesk = async () => {
+  try {
 
-      e.preventDefault()
+    await axios.post(
+      `${API}/api/workspaces/desk`,
+      {
+        workspace_id: desk.workspace_id,
+        name: desk.name,
+        type: desk.type
+      },
+      config
+    );
 
-      try{
+    setMessage("Desk created");
 
-        await api.post(
-          "/workspaces/desk",
-          desk
-        )
+    fetchData();
 
-        setMessage(
-          "Desk created"
-        )
-
-        loadData()
-
-      }catch(err){
-
-        setMessage(
-          err.response?.data
-          ?.message
-        )
-      }
-    }
+  } catch (err) {
+    console.log(err);
+  }
+};
 
   const createRoom =
     async e=>{
@@ -306,20 +300,22 @@ function WorkspaceManagement() {
 
             <input
               placeholder="Desk Name"
-              onChange={e=>
+              value={desk.name}
+              onChange={(e)=>
                 setDesk({
                   ...desk,
-                  desk_name:e.target.value
+                  name:e.target.value
                 })
               }
             />
 
             <input
-              placeholder="Seating Type"
+              placeholder="Type"
+              value={desk.type}
               onChange={e=>
                 setDesk({
                   ...desk,
-                  seating_type:e.target.value
+                  type:e.target.value
                 })
               }
             />
