@@ -1,464 +1,451 @@
-import {
-  useState,
-  useEffect
-} from "react"
-
-
-import api from "../../api/axios"
-import DashboardLayout from "../../layouts/DashboardLayout"
-
-import "./WorkspaceManagement.css"
+import { useState, useEffect } from "react";
+import api from "../../api/axios";
+import DashboardLayout from "../../layouts/DashboardLayout";
+import "./WorkspaceManagement.css";
 
 function WorkspaceManagement() {
+  const [message, setMessage] = useState("");
 
-  const [message,setMessage]=
-    useState("")
+  const [workspaces, setWorkspaces] = useState([]);
+  const [desks, setDesks] = useState([]);
+  const [rooms, setRooms] = useState([]);
 
-  const [workspaces,setWorkspaces]=
-    useState([])
-
-  const [desks,setDesks]=
-    useState([])
-
-  const [rooms,setRooms]=
-    useState([])
-
-  const [workspace,setWorkspace]=
-    useState({
-      name:"",
-      location:"",
-      floor:"",
-      pricing:""
-    })
+  const [workspace, setWorkspace] = useState({
+    name: "",
+    location: "",
+    floor: "",
+    pricing: ""
+  });
 
   const [desk, setDesk] = useState({
-  workspace_id: "",
-  name: "",
-  type: ""
-});
+    workspace_id: "",
+    name: "",
+    type: ""
+  });
 
-  const [room,setRoom]=
-  useState({
-    workspace_id:"",
-    name:"",
-    capacity:""
-  })
+  const [room, setRoom] = useState({
+    workspace_id: "",
+    name: "",
+    capacity: ""
+  });
 
-  useEffect(()=>{
-    loadData()
-  },[])
+  useEffect(() => {
+    loadData();
+  }, []);
 
-  const loadData =
-    async ()=>{
+  const loadData = async () => {
+    try {
+      const ws = await api.get("/workspaces");
+      setWorkspaces(ws.data);
 
-      const ws =
-        await api.get(
-          "/workspaces"
-        )
+      const desksResponse = await api.get("/workspaces/desks");
+      setDesks(desksResponse.data);
 
-      setWorkspaces(
-        ws.data
-      )
-
-      let allDesks=[]
-
-      for(
-        const w
-        of ws.data
-      ){
-
-        const d =
-          await api.get(
-            "/workspaces/desks"
-          )
-
-        
-      }
-
-      setDesks(
-        d.data
-      )
-
-      const r =
-        await api.get(
-          "/workspaces/rooms"
-        )
-
-      setRooms(
-        r.data
-      )
+      const roomsResponse = await api.get("/workspaces/rooms");
+      setRooms(roomsResponse.data);
+    } catch (error) {
+      console.log(error);
     }
+  };
 
-  // CREATE
+  // ==========================
+  // CREATE WORKSPACE
+  // ==========================
 
-  const createWorkspace =
-    async e=>{
+  const createWorkspace = async (e) => {
+    e.preventDefault();
 
-      e.preventDefault()
+    try {
+      await api.post("/workspaces", workspace);
 
-      try{
+      setMessage("Workspace created successfully");
 
-        await api.post(
-          "/workspaces",
-          workspace
-        )
+      setWorkspace({
+        name: "",
+        location: "",
+        floor: "",
+        pricing: ""
+      });
 
-        setMessage(
-          "Workspace created"
-        )
-
-        loadData()
-
-      }catch(err){
-
-        setMessage(
-          err.response?.data
-          ?.message
-        )
-      }
-    }
-
-  const createDesk =
-  async e=>{
-
-    e.preventDefault()
-
-    try{
-
-      await api.post(
-        "/workspaces/desk",
-        desk
-      )
-
+      loadData();
+    } catch (err) {
       setMessage(
-        "Desk created"
-      )
+        err.response?.data?.message ||
+          "Error creating workspace"
+      );
+    }
+  };
 
-      loadData()
+  // ==========================
+  // CREATE DESK
+  // ==========================
 
-    }catch(err){
+  const createDesk = async (e) => {
+    e.preventDefault();
 
+    try {
+      await api.post("/workspaces/desk", desk);
+
+      setMessage("Desk created successfully");
+
+      setDesk({
+        workspace_id: "",
+        name: "",
+        type: ""
+      });
+
+      loadData();
+    } catch (err) {
       setMessage(
-        err.response?.data
-        ?.message
-      )
+        err.response?.data?.message ||
+          "Error creating desk"
+      );
     }
-  }
+  };
 
-  const createRoom =
-    async e=>{
+  // ==========================
+  // CREATE ROOM
+  // ==========================
 
-      e.preventDefault()
+  const createRoom = async (e) => {
+    e.preventDefault();
 
-      try{
+    try {
+      await api.post("/workspaces/room", room);
 
-        await api.post(
-          "/workspaces/room",
-          room
-        )
+      setMessage("Room created successfully");
 
-        setMessage(
-          "Room created"
-        )
+      setRoom({
+        workspace_id: "",
+        name: "",
+        capacity: ""
+      });
 
-        loadData()
-
-      }catch(err){
-
-        setMessage(
-          err.response?.data
-          ?.message
-        )
-      }
+      loadData();
+    } catch (err) {
+      setMessage(
+        err.response?.data?.message ||
+          "Error creating room"
+      );
     }
+  };
 
-  // DELETE
+  // ==========================
+  // DELETE WORKSPACE
+  // ==========================
 
-  const deleteWorkspace =
-    async id=>{
+  const deleteWorkspace = async (id) => {
+    try {
+      await api.delete(`/workspaces/${id}`);
 
-      await api.delete(
-        `/workspaces/${id}`
-      )
+      setMessage("Workspace deleted");
 
-      loadData()
+      loadData();
+    } catch (err) {
+      console.log(err);
     }
+  };
 
-  const deleteDesk =
-    async id=>{
+  // ==========================
+  // DELETE DESK
+  // ==========================
 
-      await api.delete(
-        `/workspaces/desk/${id}`
-      )
+  const deleteDesk = async (id) => {
+    try {
+      await api.delete(`/workspaces/desk/${id}`);
 
-      loadData()
+      setMessage("Desk deleted");
+
+      loadData();
+    } catch (err) {
+      console.log(err);
     }
+  };
 
-  const deleteRoom =
-    async id=>{
+  // ==========================
+  // DELETE ROOM
+  // ==========================
 
-      await api.delete(
-        `/workspaces/room/${id}`
-      )
+  const deleteRoom = async (id) => {
+    try {
+      await api.delete(`/workspaces/room/${id}`);
 
-      loadData()
+      setMessage("Room deleted");
+
+      loadData();
+    } catch (err) {
+      console.log(err);
     }
+  };
 
   return (
     <DashboardLayout>
-
       <div className="manage-page">
+        <h2>Workspace Management</h2>
 
-        <h2>
-          Workspace Management
-        </h2>
+        {message && (
+          <div
+            style={{
+              background: "#dff0d8",
+              color: "#3c763d",
+              padding: "10px",
+              borderRadius: "6px",
+              marginBottom: "20px"
+            }}
+          >
+            {message}
+          </div>
+        )}
 
-        {message &&
-          <p>{message}</p>
-        }
+        {/* CREATE SECTION */}
 
-        {/* CREATE */}
-
-        <div
-          className="manage-grid"
-        >
+        <div className="manage-grid">
+          {/* Workspace */}
 
           <form
             className="manage-card"
-            onSubmit={
-              createWorkspace
-            }
+            onSubmit={createWorkspace}
           >
-
-            <h3>
-              Create Workspace
-            </h3>
+            <h3>Create Workspace</h3>
 
             <input
+              type="text"
               placeholder="Name"
-              onChange={e=>
+              value={workspace.name}
+              onChange={(e) =>
                 setWorkspace({
                   ...workspace,
-                  name:e.target.value
+                  name: e.target.value
                 })
               }
             />
 
             <input
+              type="text"
               placeholder="Location"
-              onChange={e=>
+              value={workspace.location}
+              onChange={(e) =>
                 setWorkspace({
                   ...workspace,
-                  location:e.target.value
+                  location: e.target.value
                 })
               }
             />
 
             <input
+              type="number"
               placeholder="Floor"
-              onChange={e=>
+              value={workspace.floor}
+              onChange={(e) =>
                 setWorkspace({
                   ...workspace,
-                  floor:e.target.value
+                  floor: e.target.value
                 })
               }
             />
 
             <input
+              type="number"
               placeholder="Pricing"
-              onChange={e=>
+              value={workspace.pricing}
+              onChange={(e) =>
                 setWorkspace({
                   ...workspace,
-                  pricing:e.target.value
+                  pricing: e.target.value
                 })
               }
             />
 
-            <button>
-              Create
+            <button type="submit">
+              Create Workspace
             </button>
-
           </form>
 
+          {/* Desk */}
+
           <form
             className="manage-card"
-            onSubmit={
-              createDesk
-            }
+            onSubmit={createDesk}
           >
-
-            <h3>
-              Create Desk
-            </h3>
+            <h3>Create Desk</h3>
 
             <input
+              type="number"
               placeholder="Workspace ID"
-              onChange={e=>
+              value={desk.workspace_id}
+              onChange={(e) =>
                 setDesk({
                   ...desk,
-                  workspace_id:e.target.value
+                  workspace_id: e.target.value
                 })
               }
             />
 
             <input
+              type="text"
               placeholder="Desk Name"
               value={desk.name}
-              onChange={(e)=>
+              onChange={(e) =>
                 setDesk({
                   ...desk,
-                  name:e.target.value
+                  name: e.target.value
                 })
               }
             />
 
             <input
-              placeholder="Type"
+              type="text"
+              placeholder="Desk Type"
               value={desk.type}
-              onChange={e=>
+              onChange={(e) =>
                 setDesk({
                   ...desk,
-                  type:e.target.value
+                  type: e.target.value
                 })
               }
             />
 
-            <button>
-              Create
+            <button type="submit">
+              Create Desk
             </button>
-
           </form>
+
+          {/* Room */}
 
           <form
             className="manage-card"
-            onSubmit={
-              createRoom
-            }
+            onSubmit={createRoom}
           >
-
-            <h3>
-              Create Room
-            </h3>
+            <h3>Create Room</h3>
 
             <input
+              type="number"
               placeholder="Workspace ID"
-              onChange={e=>
+              value={room.workspace_id}
+              onChange={(e) =>
                 setRoom({
                   ...room,
-                  workspace_id:e.target.value
+                  workspace_id: e.target.value
                 })
               }
             />
 
             <input
+              type="text"
               placeholder="Room Name"
-              onChange={e=>
+              value={room.name}
+              onChange={(e) =>
                 setRoom({
                   ...room,
-                  name:e.target.value
+                  name: e.target.value
                 })
               }
             />
 
             <input
+              type="number"
               placeholder="Capacity"
-              onChange={e=>
+              value={room.capacity}
+              onChange={(e) =>
                 setRoom({
                   ...room,
-                  capacity:e.target.value
+                  capacity: e.target.value
                 })
               }
             />
 
-            <button>
-              Create
+            <button type="submit">
+              Create Room
             </button>
-
           </form>
-
         </div>
 
-        {/* DELETE SECTION */}
+        {/* EXISTING RESOURCES */}
 
-        <h2
-          style={{
-            marginTop:"40px"
-          }}
-        >
+        <h2 style={{ marginTop: "40px" }}>
           Existing Resources
         </h2>
 
         <div className="manage-grid">
+          {/* Workspaces */}
 
           <div className="manage-card">
+            <h3>Workspaces</h3>
 
-            <h3>
-              Workspaces
-            </h3>
+            {workspaces.map((ws) => (
+              <div
+                key={ws.id}
+                className="manage-existing-column"
+              >
+                <span>{ws.name}</span>
 
-            {workspaces.map(
-              ws=>(
-                <div className="manage-existing-column" key={ws.id}>
-                  {ws.name}
-                  <button className="delete-button"
-                    onClick={()=>deleteWorkspace(ws.id)}
-                  >
-                    Delete
-                  </button>
-                </div>
-              )
-            )}
-
+                <button
+                  className="delete-button"
+                  onClick={() =>
+                    deleteWorkspace(ws.id)
+                  }
+                >
+                  Delete
+                </button>
+              </div>
+            ))}
           </div>
+
+          {/* Desks */}
 
           <div className="manage-card">
+            <h3>Desks</h3>
 
-            <h3>
-              Desks
-            </h3>
+            {desks.map((d) => (
+              <div
+                key={d.id}
+                className="manage-existing-column"
+              >
+                <span>
+                  {d.name || `Desk ${d.id}`}
+                </span>
 
-            {desks.map(
-              d=>(
-                <div className="manage-existing-column" key={d.id}>
-                  {d.name}
-                  <button className="delete-button"
-                    onClick={()=>deleteDesk(d.id)}
-                  >
-                    Delete
-                  </button>
-                </div>
-              )
-            )}
-
+                <button
+                  className="delete-button"
+                  onClick={() =>
+                    deleteDesk(d.id)
+                  }
+                >
+                  Delete
+                </button>
+              </div>
+            ))}
           </div>
+
+          {/* Rooms */}
 
           <div className="manage-card">
+            <h3>Rooms</h3>
 
-            <h3>
-              Rooms
-            </h3>
+            {rooms.map((r) => (
+              <div
+                key={r.id}
+                className="manage-existing-column"
+              >
+                <span>
+                  {r.name || `Room ${r.id}`}
+                </span>
 
-            {rooms.map(
-              r=>(
-                <div className="manage-existing-column" key={r.id}>
-                  {r.name}
-                  <button className="delete-button"
-                    onClick={()=>deleteRoom(r.id)}
-                  >
-                    Delete
-                  </button>
-                </div>
-              )
-            )}
-
+                <button
+                  className="delete-button"
+                  onClick={() =>
+                    deleteRoom(r.id)
+                  }
+                >
+                  Delete
+                </button>
+              </div>
+            ))}
           </div>
-
         </div>
-
       </div>
-
     </DashboardLayout>
-  )
+  );
 }
 
-export default WorkspaceManagement
+export default WorkspaceManagement;
