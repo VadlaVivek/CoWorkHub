@@ -3,6 +3,7 @@ import {
   useEffect
 } from "react"
 
+
 import api from "../../api/axios"
 import DashboardLayout from "../../layouts/DashboardLayout"
 
@@ -37,11 +38,11 @@ function WorkspaceManagement() {
 });
 
   const [room,setRoom]=
-    useState({
-      workspace_id:"",
-      room_name:"",
-      capacity:""
-    })
+  useState({
+    workspace_id:"",
+    name:"",
+    capacity:""
+  })
 
   useEffect(()=>{
     loadData()
@@ -68,17 +69,14 @@ function WorkspaceManagement() {
 
         const d =
           await api.get(
-            `/workspaces/desks/availability?workspace_id=${w.id}`
+            "/workspaces/desks"
           )
 
-        allDesks=[
-          ...allDesks,
-          ...d.data
-        ]
+        
       }
 
       setDesks(
-        allDesks
+        d.data
       )
 
       const r =
@@ -120,27 +118,32 @@ function WorkspaceManagement() {
       }
     }
 
-  const createDesk = async () => {
-  try {
+  const createDesk =
+  async e=>{
 
-    await axios.post(
-      `${API}/api/workspaces/desk`,
-      {
-        workspace_id: desk.workspace_id,
-        name: desk.name,
-        type: desk.type
-      },
-      config
-    );
+    e.preventDefault()
 
-    setMessage("Desk created");
+    try{
 
-    fetchData();
+      await api.post(
+        "/workspaces/desk",
+        desk
+      )
 
-  } catch (err) {
-    console.log(err);
+      setMessage(
+        "Desk created"
+      )
+
+      loadData()
+
+    }catch(err){
+
+      setMessage(
+        err.response?.data
+        ?.message
+      )
+    }
   }
-};
 
   const createRoom =
     async e=>{
@@ -352,7 +355,7 @@ function WorkspaceManagement() {
               onChange={e=>
                 setRoom({
                   ...room,
-                  room_name:e.target.value
+                  name:e.target.value
                 })
               }
             />
@@ -417,7 +420,7 @@ function WorkspaceManagement() {
             {desks.map(
               d=>(
                 <div className="manage-existing-column" key={d.id}>
-                  {d.desk_name}
+                  {d.name}
                   <button className="delete-button"
                     onClick={()=>deleteDesk(d.id)}
                   >
@@ -438,7 +441,7 @@ function WorkspaceManagement() {
             {rooms.map(
               r=>(
                 <div className="manage-existing-column" key={r.id}>
-                  {r.room_name}
+                  {r.name}
                   <button className="delete-button"
                     onClick={()=>deleteRoom(r.id)}
                   >
