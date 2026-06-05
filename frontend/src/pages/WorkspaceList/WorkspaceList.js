@@ -1,158 +1,89 @@
-import {
-  useEffect,
-  useState
-} from "react"
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-import {
-  useNavigate
-} from "react-router-dom"
+import api from "../../api/axios";
+import DashboardLayout from "../../layouts/DashboardLayout";
 
-import api from "../../api/axios"
+import DeskCard from "../../components/DeskCard/DeskCard";
+import RoomCard from "../../components/RoomCard/RoomCard";
+import Filters from "../../components/Filters/Filters";
 
-import DashboardLayout
-from "../../layouts/DashboardLayout"
-
-import DeskCard
-from "../../components/DeskCard/DeskCard"
-
-import RoomCard
-from "../../components/RoomCard/RoomCard"
-
-import Filters
-from "../../components/Filters/Filters"
-
-import "./WorkspaceList.css"
+import "./WorkspaceList.css";
 
 function WorkspaceList() {
+  const navigate = useNavigate();
 
-  const navigate =
-    useNavigate()
+  const [workspaces, setWorkspaces] = useState([]);
+  const [desks, setDesks] = useState([]);
+  const [rooms, setRooms] = useState([]);
+  const [filter, setFilter] = useState("");
 
-  const [workspaces,
-    setWorkspaces] =
-    useState([])
+  useEffect(() => {
+    loadData();
+  }, []);
 
-  const [desks,
-    setDesks] =
-    useState([])
+  const loadData = async () => {
+    try {
+      // Workspaces
+      const wsRes = await api.get("/workspaces");
+      setWorkspaces(wsRes.data);
 
-  const [rooms,
-    setRooms] =
-    useState([])
+      // Desks
+      const deskRes = await api.get("/workspaces/desks");
+      setDesks(deskRes.data);
 
-  const [filter,
-    setFilter] =
-    useState("")
-
-  useEffect(()=>{
-
-    loadData()
-
-  },[])
-
-  const loadData =
-    async ()=>{
-
-      try {
-
-        const wsRes =
-          await api.get(
-            "/workspaces"
-          )
-
-        setWorkspaces(
-          wsRes.data
-        )
-
-        let allDesks=[]
-
-        for(
-          const ws
-          of wsRes.data
-        ){
-
-          const res =
-            await api.get(
-              `/workspaces/desks/availability?workspace_id=${ws.id}`
-            )
-
-          allDesks=[
-            ...allDesks,
-            ...res.data
-          ]
-        }
-
-        setDesks(
-          allDesks
-        )
-
-        const roomRes =
-          await api.get(
-            "/workspaces/rooms"
-          )
-
-        setRooms(
-          roomRes.data
-        )
-
-      } catch(err){
-
-        console.log(err)
-      }
+      // Rooms
+      const roomRes = await api.get("/workspaces/rooms");
+      setRooms(roomRes.data);
+    } catch (err) {
+      console.error("Error loading workspace data:", err);
     }
+  };
 
-  const filtered =
-    filter
-      ? desks.filter(
-          d =>
-            d.seating_type
-            === filter
-        )
-      : desks
+  const filteredDesks = filter
+    ? desks.filter(
+        (desk) =>
+          desk.type &&
+          desk.type.toLowerCase() === filter.toLowerCase()
+      )
+    : desks;
 
   return (
     <DashboardLayout>
+      <div className="workspace-page">
 
-      <div
-        className="workspace-page"
-      >
+        {/* WORKSPACES */}
 
-        <h2>
-          Workspaces
-        </h2>
+        <h2>Workspaces</h2>
 
-        <div
-          className="desk-grid"
-        >
-          {workspaces.map(
-            ws=>(
+        <div className="desk-grid">
+          {workspaces.length > 0 ? (
+            workspaces.map((ws) => (
               <div
                 key={ws.id}
                 className="desk-card"
               >
-                <h3>
-                  {ws.name}
-                </h3>
+                <h3>{ws.name}</h3>
+
+                <p>{ws.location}</p>
 
                 <p>
-                  {ws.location}
+                  Floor: {ws.floor}
                 </p>
 
                 <p>
-                  Floor:
-                  {" "}
-                  {ws.floor}
+                  Pricing: ₹{ws.pricing}
                 </p>
               </div>
-            )
+            ))
+          ) : (
+            <p>No workspaces available</p>
           )}
         </div>
 
-        <h2
-          style={{
-            marginTop:"35px"
-          }}
-        >
+        {/* DESKS */}
+
+        <h2 style={{ marginTop: "35px" }}>
           Available Desks
         </h2>
 
@@ -161,69 +92,55 @@ function WorkspaceList() {
           setFilter={setFilter}
         />
 
-        <div
-          className="desk-grid"
-        >
-
-          {filtered.map(
-            desk => (
-
+        <div className="desk-grid">
+          {filteredDesks.length > 0 ? (
+            filteredDesks.map((desk) => (
               <DeskCard
                 key={desk.id}
                 desk={desk}
-                onReserve={()=>
-                  navigate(
-                    "/reserve",
-                    {
-                      state:{
-                        desk
-                      }
+                onReserve={() =>
+                  navigate("/reserve", {
+                    state: {
+                      desk
                     }
-                  )
+                  })
                 }
               />
-            )
+            ))
+          ) : (
+            <p>No desks available</p>
           )}
-
         </div>
 
-        <h2
-          style={{
-            marginTop:"35px"
-          }}
-        >
+        {/* ROOMS */}
+
+        <h2 style={{ marginTop: "35px" }}>
           Meeting Rooms
         </h2>
 
-        <div
-          className="desk-grid"
-        >
-
-          {rooms.map(
-            room=>(
+        <div className="desk-grid">
+          {rooms.length > 0 ? (
+            rooms.map((room) => (
               <RoomCard
                 key={room.id}
                 room={room}
                 onReserve={() =>
-                  navigate(
-                    "/reserve",
-                    {
-                      state:{
-                        room
-                      }
+                  navigate("/reserve", {
+                    state: {
+                      room
                     }
-                  )
+                  })
                 }
               />
-            )
+            ))
+          ) : (
+            <p>No meeting rooms available</p>
           )}
-
         </div>
 
       </div>
-
     </DashboardLayout>
-  )
+  );
 }
 
-export default WorkspaceList
+export default WorkspaceList;

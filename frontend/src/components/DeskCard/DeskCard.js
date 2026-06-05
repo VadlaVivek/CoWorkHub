@@ -9,13 +9,13 @@ function DeskCard({
     <div className="desk-card">
 
       <h3>
-        {desk.desk_name}
+        {desk.name}
       </h3>
 
       <p>
         Type:
         {" "}
-        {desk.seating_type}
+        {desk.type}
       </p>
 
       <button

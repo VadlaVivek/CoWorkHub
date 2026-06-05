@@ -9,7 +9,7 @@ function RoomCard({
     <div className="room-card">
 
       <h3>
-        {room.room_name}
+        {room.name}
       </h3>
 
       <p>
