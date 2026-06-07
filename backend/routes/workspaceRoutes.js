@@ -183,8 +183,8 @@ router.post(
       INSERT INTO desks
       (
         workspace_id,
-        desk_name,
-        seating_type,
+        name,
+        type,
         status
       )
       VALUES (?, ?, ?, 'available')
@@ -223,7 +223,7 @@ router.post(
 
     const {
       workspace_id,
-      room_name,
+      name,
       capacity
     } = req.body
 
@@ -232,7 +232,7 @@ router.post(
       INSERT INTO meeting_rooms
       (
         workspace_id,
-        room_name,
+        name,
         capacity,
         status
       )
@@ -240,7 +240,7 @@ router.post(
       `,
       [
         workspace_id,
-        room_name,
+        name,
         capacity
       ],
       function (err) {

@@ -112,9 +112,9 @@ function ReservationPage() {
           Reserve
           {" "}
           {
-            desk?.desk_name
+            desk?.name
             ||
-            room?.room_name
+            room?.name
           }
         </h2>
 
