@@ -1,3 +1,15 @@
+
+
+.title{
+  font-size:36px;
+  height:150px;
+  text-align:center;
+  margin-bottom:60px;
+}
+
+
+
+
 .login-page {
   min-height: 100vh;
 
@@ -7,14 +19,13 @@
       rgba(0,0,0,0.45)
     ),
     url("https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=2070");
-
+  height: 100vh;
   background-size: cover;
   background-position: center;
-
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-
   padding: 20px;
 }
 

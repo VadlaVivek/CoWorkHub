@@ -141,27 +141,7 @@ function Login() {
           Login
         </button>
 
-        <div className="demo-box">
-          <h4>Demo Credentials</h4>
-
-          <p>
-            <strong>Admin</strong><br />
-            admin@test.com<br />
-            admin123
-          </p>
-
-          <p>
-            <strong>Member</strong><br />
-            member@test.com<br />
-            member123
-          </p>
-
-          <p>
-            <strong>Staff</strong><br />
-            staff@test.com<br />
-            staff123
-          </p>
-        </div>
+        
       </form>
     </div>
   )
