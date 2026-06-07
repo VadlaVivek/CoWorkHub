@@ -1,9 +1,6 @@
 const db = require("../database/db")
 
 // CREATE RESERVATION
-console.log("===== CREATE RESERVATION =====");
-console.log("USER:", req.user);
-console.log("BODY:", req.body);
 
 exports.createReservation = (
   req,

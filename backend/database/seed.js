@@ -4,17 +4,18 @@ const db = require("./db")
 async function seed() {
 
   const adminPassword =
-    await bcrypt.hash("admin123",10)
+    await bcrypt.hash("admin123", 10)
 
   const memberPassword =
-    await bcrypt.hash("member123",10)
+    await bcrypt.hash("member123", 10)
 
   const staffPassword =
-    await bcrypt.hash("staff123",10)
+    await bcrypt.hash("staff123", 10)
 
-  db.serialize(()=>{
+  db.serialize(() => {
 
     // USERS
+
     db.run(`
       CREATE TABLE IF NOT EXISTS users(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -25,6 +26,7 @@ async function seed() {
     `)
 
     // WORKSPACES
+
     db.run(`
       CREATE TABLE IF NOT EXISTS workspaces(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -36,75 +38,111 @@ async function seed() {
     `)
 
     // DESKS
+
     db.run(`
       CREATE TABLE IF NOT EXISTS desks(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         workspace_id INTEGER,
         name TEXT,
         type TEXT,
-        status TEXT DEFAULT 'available'
+        status TEXT DEFAULT 'available',
+        FOREIGN KEY(workspace_id)
+        REFERENCES workspaces(id)
       )
     `)
 
     // ROOMS
+
     db.run(`
       CREATE TABLE IF NOT EXISTS rooms(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         workspace_id INTEGER,
         name TEXT,
         capacity INTEGER,
-        status TEXT DEFAULT 'available'
+        status TEXT DEFAULT 'available',
+        FOREIGN KEY(workspace_id)
+        REFERENCES workspaces(id)
       )
     `)
 
     // RESERVATIONS
+
     db.run(`
       CREATE TABLE IF NOT EXISTS reservations(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER,
+        workspace_id INTEGER,
         desk_id INTEGER,
         room_id INTEGER,
-        date TEXT,
-        duration TEXT,
+        reservation_date TEXT,
+        duration INTEGER,
         purpose TEXT,
-        status TEXT DEFAULT 'Reserved'
+        attendee_count INTEGER,
+        status TEXT DEFAULT 'Reserved',
+
+        FOREIGN KEY(user_id)
+        REFERENCES users(id),
+
+        FOREIGN KEY(workspace_id)
+        REFERENCES workspaces(id),
+
+        FOREIGN KEY(desk_id)
+        REFERENCES desks(id),
+
+        FOREIGN KEY(room_id)
+        REFERENCES rooms(id)
       )
     `)
 
-    // USERS SEED
+    // STATUS LOGS
+
+    db.run(`
+      CREATE TABLE IF NOT EXISTS reservation_status_logs(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        reservation_id INTEGER,
+        status TEXT,
+        updated_by INTEGER,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `)
+
+    // ADMIN
+
     db.run(
       `
       INSERT OR IGNORE INTO users
       (email,password,role)
       VALUES
-      ('admin@test.com',?,'admin')
+      ('admin@test.com', ?, 'admin')
       `,
       [adminPassword]
     )
 
+    // MEMBER
+
     db.run(
       `
       INSERT OR IGNORE INTO users
       (email,password,role)
       VALUES
-      ('member@test.com',?,'member')
+      ('member@test.com', ?, 'member')
       `,
       [memberPassword]
     )
 
+    // STAFF
+
     db.run(
       `
       INSERT OR IGNORE INTO users
       (email,password,role)
       VALUES
-      ('staff@test.com',?,'staff')
+      ('staff@test.com', ?, 'staff')
       `,
       [staffPassword]
     )
 
-    console.log(
-      "Database seeded"
-    )
+    console.log("Database seeded")
   })
 }
 
