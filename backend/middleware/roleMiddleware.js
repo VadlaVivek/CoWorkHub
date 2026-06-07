@@ -1,10 +1,6 @@
 module.exports = (...roles) => {
 
-  return (
-    req,
-    res,
-    next
-  ) => {
+  return (req,res,next) => {
 
     if (
       !roles.includes(
