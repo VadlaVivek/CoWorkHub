@@ -1,209 +1,133 @@
-const db = require("../database/db");
+const express = require("express")
+const cors = require("cors")
+const dotenv = require("dotenv")
 
-// =========================
-// CREATE RESERVATION
-// =========================
+dotenv.config()
 
-exports.createReservation = (req, res) => {
+const app = express()
 
-  const {
-    workspace_id,
-    desk_id,
-    room_id,
-    reservation_date,
-    duration,
-    purpose,
-    attendee_count
-  } = req.body;
+const db = require("./database/db")
+const seed = require("./database/seed")
 
-  const user_id = req.user.id;
+// Routes
+const authRoutes =
+require("./routes/authRoutes")
 
-  if (
-    !workspace_id ||
-    !reservation_date ||
-    !duration
-  ) {
-    return res.status(400).json({
-      message: "Required fields missing"
-    });
-  }
+const workspaceRoutes =
+require("./routes/workspaceRoutes")
 
-  const checkQuery = `
-    SELECT *
-    FROM reservations
-    WHERE reservation_date = ?
-    AND (
-      desk_id = ?
-      OR room_id = ?
-    )
-    AND status != 'Cancelled'
-  `;
+const reservationRoutes =
+require("./routes/reservationRoutes")
 
-  db.get(
-    checkQuery,
-    [
-      reservation_date,
-      desk_id || null,
-      room_id || null
+const dashboardRoutes =
+require("./routes/dashboardRoutes")
+
+// Middleware
+app.use(express.json())
+
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "https://coworkhub-vebg.onrender.com"
     ],
-    (err, existing) => {
+    credentials: true
+  })
+)
 
-      if (err) {
-        console.log(err);
+// Root Route
+app.get("/", (req, res) => {
+  res.json({
+    message: "API Running"
+  })
+})
 
-        return res.status(500).json({
-          message: err.message
-        });
-      }
+// Test Users Route
+app.get(
+  "/test-users",
+  (req, res) => {
 
-      if (existing) {
-        return res.status(400).json({
-          message: "Desk or room already booked"
-        });
-      }
+    db.all(
+      `
+      SELECT
+      id,
+      email,
+      role
+      FROM users
+      `,
+      [],
+      (err, rows) => {
 
-      db.run(
-        `
-        INSERT INTO reservations
-        (
-          user_id,
-          workspace_id,
-          desk_id,
-          room_id,
-          reservation_date,
-          duration,
-          purpose,
-          attendee_count
-        )
-        VALUES
-        (?, ?, ?, ?, ?, ?, ?, ?)
-        `,
-        [
-          user_id,
-          workspace_id,
-          desk_id || null,
-          room_id || null,
-          reservation_date,
-          duration,
-          purpose || "",
-          attendee_count || 1
-        ],
-        function (err) {
-
-          if (err) {
-
-            console.log(err);
-
-            return res.status(500).json({
-              message: err.message
-            });
-          }
-
-          console.log(
-            "Reservation Created:",
-            this.lastID
-          );
-
-          res.status(201).json({
-            message: "Reservation created",
-            reservationId: this.lastID
-          });
+        if (err) {
+          return res
+            .status(500)
+            .json(err)
         }
-      );
-    }
-  );
-};
 
-// =========================
-// GET RESERVATIONS
-// =========================
-
-exports.getReservations = (req, res) => {
-
-  let query = `
-    SELECT
-      r.*,
-      d.name AS desk_name,
-      rm.name AS room_name
-    FROM reservations r
-    LEFT JOIN desks d
-      ON r.desk_id = d.id
-    LEFT JOIN rooms rm
-      ON r.room_id = rm.id
-  `;
-
-  const params = [];
-
-  if (req.user.role === "member") {
-
-    query += `
-      WHERE r.user_id = ?
-    `;
-
-    params.push(req.user.id);
+        res.json(rows)
+      }
+    )
   }
+)
 
-  query += `
-    ORDER BY r.id DESC
-  `;
+// API Routes
+app.use(
+  "/api/auth",
+  authRoutes
+)
+
+app.use(
+  "/api/workspaces",
+  workspaceRoutes
+)
+
+app.use(
+  "/api/reservations",
+  reservationRoutes
+)
+
+app.use(
+  "/api/dashboard",
+  dashboardRoutes
+)
+
+// Start Server After DB Ready
+const PORT =
+  process.env.PORT
+  || 5000
+
+db.serialize(() => {
+
+  console.log(
+    "Initializing DB..."
+  )
+
+  seed()
+
+  app.listen(
+    PORT,
+    () => {
+
+      console.log(
+        `Server running on ${PORT}`
+      )
+    }
+  )
+})
+
+app.get("/debug-reservations", (req, res) => {
 
   db.all(
-    query,
-    params,
+    "SELECT * FROM reservations",
+    [],
     (err, rows) => {
 
       if (err) {
-
-        console.log(err);
-
-        return res.status(500).json({
-          message: err.message
-        });
+        return res.status(500).json(err);
       }
 
       res.json(rows);
     }
   );
-};
 
-// =========================
-// UPDATE STATUS
-// =========================
-
-exports.updateReservationStatus = (
-  req,
-  res
-) => {
-
-  const { status } = req.body;
-
-  const reservationId =
-    req.params.id;
-
-  db.run(
-    `
-    UPDATE reservations
-    SET status = ?
-    WHERE id = ?
-    `,
-    [
-      status,
-      reservationId
-    ],
-    function (err) {
-
-      if (err) {
-
-        console.log(err);
-
-        return res.status(500).json({
-          message: err.message
-        });
-      }
-
-      res.json({
-        message: "Status updated"
-      });
-    }
-  );
-};
+});
