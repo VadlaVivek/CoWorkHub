@@ -70,15 +70,15 @@ exports.createDesk = (
 
   const {
     workspace_id,
-    desk_name,
-    seating_type
+    name,
+    type
   } = req.body
 
   // VALIDATION
   if (
     !workspace_id ||
-    !desk_name ||
-    !seating_type
+    !name ||
+    !type
   ) {
     return res.status(400).json({
       message:
@@ -91,15 +91,15 @@ exports.createDesk = (
     INSERT INTO desks
     (
       workspace_id,
-      desk_name,
-      seating_type
+      name,
+      type
     )
     VALUES (?, ?, ?)
     `,
     [
       workspace_id,
-      desk_name,
-      seating_type
+      name,
+      type
     ],
     function(err){
 
@@ -129,13 +129,13 @@ exports.createMeetingRoom = (
 
   const {
     workspace_id,
-    room_name,
+    name,
     capacity
   } = req.body
 
   if (
     !workspace_id ||
-    !room_name ||
+    !name ||
     !capacity
   ) {
     return res.status(400).json({
@@ -149,14 +149,14 @@ exports.createMeetingRoom = (
     INSERT INTO meeting_rooms
     (
       workspace_id,
-      room_name,
+      name,
       capacity
     )
     VALUES (?, ?, ?)
     `,
     [
       workspace_id,
-      room_name,
+      name,
       capacity
     ],
     function(err){

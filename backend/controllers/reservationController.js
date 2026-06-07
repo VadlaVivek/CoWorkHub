@@ -150,54 +150,44 @@ exports.createReservation = (
 }
 
 // GET RESERVATIONS
-exports.getReservations =
-(req,res)=>{
+exports.getReservations = (req, res) => {
 
   let query = `
     SELECT
       r.*,
-      u.name AS member_name,
-      d.desk_name,
-      mr.room_name
+      d.name AS desk_name,
+      rm.name AS room_name
     FROM reservations r
-    LEFT JOIN users u
-      ON r.user_id = u.id
     LEFT JOIN desks d
       ON r.desk_id = d.id
-    LEFT JOIN meeting_rooms mr
-      ON r.room_id = mr.id
-  `
+    LEFT JOIN rooms rm
+      ON r.room_id = rm.id
+  `;
 
-  let params = []
+  let params = [];
 
-  if (
-    req.user.role ===
-    "member"
-  ) {
-
-    query +=
-      ` WHERE r.user_id = ?`
-
-    params.push(
-      req.user.id
-    )
+  if (req.user.role === "member") {
+    query += ` WHERE r.user_id = ?`;
+    params.push(req.user.id);
   }
 
   db.all(
     query,
     params,
-    (err,rows)=>{
+    (err, rows) => {
 
-      if(err){
-        return res
-          .status(500)
-          .json(err)
+      if (err) {
+        console.log(err);
+
+        return res.status(500).json({
+          message: err.message
+        });
       }
 
-      res.json(rows)
+      res.json(rows);
     }
-  )
-}
+  );
+};
 
 // UPDATE STATUS
 exports.updateReservationStatus =
