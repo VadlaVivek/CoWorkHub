@@ -104,7 +104,7 @@ function Login() {
     >
 
       <div className="title">
-        <h1>CoWorkHub</h1>
+        <h1 >CoWorkHub</h1>
         <p>Reserve your workspace anytime</p>
       </div>
       <form
