@@ -146,7 +146,7 @@ exports.createMeetingRoom = (
 
   db.run(
     `
-    INSERT INTO meeting_rooms
+    INSERT INTO rooms
     (
       workspace_id,
       name,
@@ -242,7 +242,7 @@ exports.getRooms =
   db.all(
     `
     SELECT *
-    FROM meeting_rooms
+    FROM rooms
     `,
     [],
     (err,rows)=>{
@@ -319,7 +319,7 @@ exports.deleteRoom =
 
   db.run(
     `
-    DELETE FROM meeting_rooms
+    DELETE FROM rooms
     WHERE id=?
     `,
     [req.params.id],

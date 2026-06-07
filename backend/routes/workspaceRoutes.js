@@ -101,7 +101,7 @@ router.get(
 router.get("/rooms", (req, res) => {
 
   db.all(
-    "SELECT * FROM meeting_rooms",
+    "SELECT * FROM rooms",
     [],
     (err, rows) => {
 
@@ -229,7 +229,7 @@ router.post(
 
     db.run(
       `
-      INSERT INTO meeting_rooms
+      INSERT INTO rooms
       (
         workspace_id,
         name,
@@ -336,7 +336,7 @@ router.delete(
 
     db.run(
       `
-      DELETE FROM meeting_rooms
+      DELETE FROM rooms
       WHERE id = ?
       `,
       [req.params.id],

@@ -44,7 +44,7 @@ db.serialize(() => {
 
   // MEETING ROOMS
   db.run(`
-    CREATE TABLE IF NOT EXISTS meeting_rooms (
+    CREATE TABLE IF NOT EXISTS rooms (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       workspace_id INTEGER,
       name TEXT NOT NULL,
@@ -90,7 +90,7 @@ db.serialize(() => {
       REFERENCES desks(id),
 
       FOREIGN KEY(room_id)
-      REFERENCES meeting_rooms(id)
+      REFERENCES rooms(id)
     )
   `)
 
