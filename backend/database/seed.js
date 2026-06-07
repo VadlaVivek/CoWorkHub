@@ -142,6 +142,50 @@ async function seed() {
       [staffPassword]
     )
 
+    // insert sample workspace
+
+    db.run(`
+    INSERT OR IGNORE INTO workspaces
+    (id,name,location,floor,pricing)
+    VALUES
+    (
+      1,
+      'Innovative Hub',
+      'S.V Towers, Hi-Tech City',
+      8,
+      500
+    )`);
+
+    // insert sample desks
+
+    db.run(`
+    INSERT OR IGNORE INTO desks
+    (id,workspace_id,name,type,status)
+    VALUES
+    (
+      1,
+      1,
+      'V1',
+      'Window',
+      'available'
+    )
+    `);
+
+    // insert sample rooms
+
+    db.run(`
+    INSERT OR IGNORE INTO rooms
+    (id,workspace_id,name,capacity,status)
+    VALUES
+    (
+      1,
+      1,
+      'Seminar',
+      30,
+      'available'
+    )
+  `);
+
     console.log("Database seeded")
   })
 }
