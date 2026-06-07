@@ -59,6 +59,8 @@ function ReservationPage() {
 
   console.log("Submitting reservation");
 
+  try {
+
   const payload = {
     workspace_id:
       desk?.workspace_id ||
@@ -71,35 +73,34 @@ function ReservationPage() {
     ...form
   };
 
-  console.log(payload);
+  console.log("Submitting:", payload);
 
-  try {
+  const res = await api.post(
+    "/reservations",
+    payload
+  );
 
-    const res = await api.post(
-      "/reservations",
-      payload
-    );
+  console.log("SUCCESS:", res.data);
 
-    console.log("SUCCESS", res.data);
+  alert("Reservation Created");
 
-    alert("Reservation Created Successfully");
+  navigate("/reservations");
 
-    navigate("/reservations");
+} catch (err) {
 
-  } catch (err) {
+  console.log("ERROR:", err);
+  console.log("RESPONSE:", err.response);
 
-    console.log("ERROR", err);
+  alert(
+    err.response?.data?.message ||
+    err.message
+  );
 
-    alert(
-      err.response?.data?.message ||
-      err.message
-    );
-
-    setMessage(
-      err.response?.data?.message ||
-      "Booking failed"
-    );
-  }
+  setMessage(
+    err.response?.data?.message ||
+    "Booking failed"
+  );
+}
 };
 
   return (
