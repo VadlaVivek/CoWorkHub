@@ -105,16 +105,16 @@ function Login() {
 
       <div className="title">
         <h1>CoWorkHub</h1>
-        <p>Reserve your Space</p>
+        <p>Reserve your workspace anytime</p>
       </div>
       <form
         className="login-card"
         onSubmit={handleSubmit}
       >
-        <h2>CoWorkHub</h2>
+        <h2>Welcome to CoWorkHub</h2>
 
         <p className="login-subtitle">
-          Reserve your workspace anytime
+          Please login to continue
         </p>
 
         {error && (
