@@ -102,7 +102,8 @@ async function seed() {
         reservation_id INTEGER,
         status TEXT,
         updated_by INTEGER,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
     `)
 
@@ -185,6 +186,118 @@ async function seed() {
       'available'
     )
   `);
+
+  // DEMO RESERVATIONS
+
+    db.run(`
+    INSERT OR IGNORE INTO reservations
+    (
+      id,
+      user_id,
+      workspace_id,
+      desk_id,
+      room_id,
+      reservation_date,
+      duration,
+      purpose,
+      attendee_count,
+      status
+    )
+    VALUES
+    (
+      1,
+      2,
+      1,
+      1,
+      NULL,
+      '2026-06-15',
+      4,
+      'Development Work',
+      1,
+      'Reserved'
+    )
+    `);
+
+    db.run(`
+    INSERT OR IGNORE INTO reservations
+    (
+      id,
+      user_id,
+      workspace_id,
+      desk_id,
+      room_id,
+      reservation_date,
+      duration,
+      purpose,
+      attendee_count,
+      status
+    )
+    VALUES
+    (
+      2,
+      2,
+      1,
+      NULL,
+      1,
+      '2026-06-20',
+      2,
+      'Team Seminar',
+      20,
+      'Approved'
+    )
+    `);
+
+    db.run(`
+    INSERT OR IGNORE INTO reservations
+    (
+      id,
+      user_id,
+      workspace_id,
+      desk_id,
+      room_id,
+      reservation_date,
+      duration,
+      purpose,
+      attendee_count,
+      status
+    )
+    VALUES
+    (
+      3,
+      2,
+      1,
+      1,
+      NULL,
+      '2026-06-25',
+      8,
+      'Project Sprint',
+      1,
+      'Completed'
+    )
+`);
+
+    // STATUS LOGS
+
+    db.run(`
+INSERT OR IGNORE INTO reservation_status_logs
+(id,reservation_id,status,updated_by)
+VALUES
+(1,1,'Reserved',1)
+`);
+
+db.run(`
+INSERT OR IGNORE INTO reservation_status_logs
+(id,reservation_id,status,updated_by)
+VALUES
+(2,2,'Approved',3)
+`);
+
+db.run(`
+INSERT OR IGNORE INTO reservation_status_logs
+(id,reservation_id,status,updated_by)
+VALUES
+(3,3,'Completed',1)
+`);
 
     console.log("Database seeded")
   })
