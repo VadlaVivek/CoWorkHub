@@ -33,8 +33,8 @@ db.serialize(() => {
     CREATE TABLE IF NOT EXISTS desks (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       workspace_id INTEGER,
-      desk_name TEXT NOT NULL,
-      seating_type TEXT NOT NULL,
+      name TEXT NOT NULL,
+      type TEXT NOT NULL,
       available INTEGER DEFAULT 1,
       FOREIGN KEY(workspace_id)
       REFERENCES workspaces(id)
@@ -47,7 +47,7 @@ db.serialize(() => {
     CREATE TABLE IF NOT EXISTS meeting_rooms (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       workspace_id INTEGER,
-      room_name TEXT NOT NULL,
+      name TEXT NOT NULL,
       capacity INTEGER NOT NULL,
       available INTEGER DEFAULT 1,
       FOREIGN KEY(workspace_id)
