@@ -109,45 +109,59 @@ function Login() {
       </div>
       <form
         className="login-card"
-        onSubmit={
-          handleSubmit
-        }
+        onSubmit={handleSubmit}
       >
+        <h2>CoWorkHub</h2>
 
-        <h2>
-          Login
-        </h2>
+        <p className="login-subtitle">
+          Reserve your workspace anytime
+        </p>
 
-        {error &&
-          <p
-            className="error"
-          >
+        {error && (
+          <p className="error">
             {error}
           </p>
-        }
+        )}
 
         <input
           type="email"
           name="email"
           placeholder="Email"
-          onChange={
-            handleChange
-          }
+          onChange={handleChange}
         />
 
         <input
           type="password"
           name="password"
           placeholder="Password"
-          onChange={
-            handleChange
-          }
+          onChange={handleChange}
         />
 
-        <button>
+        <button type="submit">
           Login
         </button>
 
+        <div className="demo-box">
+          <h4>Demo Credentials</h4>
+
+          <p>
+            <strong>Admin</strong><br />
+            admin@test.com<br />
+            admin123
+          </p>
+
+          <p>
+            <strong>Member</strong><br />
+            member@test.com<br />
+            member123
+          </p>
+
+          <p>
+            <strong>Staff</strong><br />
+            staff@test.com<br />
+            staff123
+          </p>
+        </div>
       </form>
     </div>
   )
