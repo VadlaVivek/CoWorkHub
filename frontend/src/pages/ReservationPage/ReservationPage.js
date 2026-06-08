@@ -13,6 +13,26 @@ import DashboardLayout from "../../layouts/DashboardLayout"
 
 import "./ReservationPage.css"
 
+const emptyForm = {
+  reservation_date:"",
+  duration:"",
+  purpose:"",
+  attendee_count:1
+}
+
+const readSessionJson = (key, fallback) => {
+  try {
+    const saved =
+      sessionStorage.getItem(key)
+
+    return saved
+      ? JSON.parse(saved)
+      : fallback
+  } catch {
+    return fallback
+  }
+}
+
 function ReservationPage() {
 
   const location = useLocation()
@@ -20,14 +40,10 @@ function ReservationPage() {
 
   const savedSelection =
     useMemo(() => {
-      const saved =
-        sessionStorage.getItem(
-          "reservationSelection"
-        )
-
-      return saved
-        ? JSON.parse(saved)
-        : {}
+      return readSessionJson(
+        "reservationSelection",
+        {}
+      )
     }, [])
 
   const desk =
@@ -40,12 +56,12 @@ function ReservationPage() {
 
 
   const [form, setForm] =
-    useState({
-      reservation_date:"",
-      duration:"",
-      purpose:"",
-      attendee_count:1
-    })
+    useState(() =>
+      readSessionJson(
+        "reservationDraft",
+        emptyForm
+      )
+    )
 
   const [message, setMessage] =
     useState("")
@@ -60,7 +76,18 @@ function ReservationPage() {
         <div className="reserve-card">
           <h2>No Desk Selected</h2>
           <button
-            onClick={() => navigate("/")}
+            type="button"
+            onClick={() => {
+              sessionStorage.removeItem(
+                "reservationSelection"
+              )
+
+              sessionStorage.removeItem(
+                "reservationDraft"
+              )
+
+              navigate("/")
+            }}
           >
             Back
           </button>
@@ -70,11 +97,18 @@ function ReservationPage() {
   }
 
   const handleChange = e => {
-    setForm({
+    const nextForm = {
       ...form,
       [e.target.name]:
         e.target.value
-    })
+    }
+
+    setForm(nextForm)
+
+    sessionStorage.setItem(
+      "reservationDraft",
+      JSON.stringify(nextForm)
+    )
   }
 
   const handleSubmit = async (e) => {
