@@ -3,7 +3,10 @@ import {
   useNavigate
 } from "react-router-dom"
 
-import { useState } from "react"
+import { 
+  useMemo,
+  useState
+ } from "react"
 
 import api from "../../api/axios"
 import DashboardLayout from "../../layouts/DashboardLayout"
@@ -15,9 +18,26 @@ function ReservationPage() {
   const location = useLocation()
   const navigate = useNavigate()
 
-  const desk = location.state?.desk
+  const savedSelection =
+    useMemo(() => {
+      const saved =
+        sessionStorage.getItem(
+          "reservationSelection"
+        )
 
-  const room = location.state?.room
+      return saved
+        ? JSON.parse(saved)
+        : {}
+    }, [])
+
+  const desk =
+    location.state?.desk ||
+    savedSelection.desk
+
+  const room =
+    location.state?.room ||
+    savedSelection.room
+
 
   const [form, setForm] =
     useState({
@@ -29,6 +49,9 @@ function ReservationPage() {
 
   const [message, setMessage] =
     useState("")
+
+  const [submitting, setSubmitting] =
+    useState(false)
 
   // IMPORTANT FIX
   if (!desk && !room) {
@@ -57,7 +80,8 @@ function ReservationPage() {
   const handleSubmit = async (e) => {
   e.preventDefault();
 
-  console.log("Submitting reservation");
+  setMessage("");
+  setSubmitting(true);
 
   try {
 
@@ -73,8 +97,6 @@ function ReservationPage() {
     ...form
   };
 
-  console.log("Submitting:", payload);
-
   const res = await api.post(
     "/reservations",
     payload
@@ -83,6 +105,10 @@ function ReservationPage() {
   console.log("SUCCESS:", res.data);
 
   alert("Reservation Created");
+
+  sessionStorage.removeItem(
+    "reservationSelection"
+  );
 
   navigate("/reservations");
 
@@ -100,6 +126,8 @@ function ReservationPage() {
     err.response?.data?.message ||
     "Booking failed"
   );
+} finally {
+  setSubmitting(false);
 }
 };
 
@@ -131,6 +159,9 @@ function ReservationPage() {
           <input
             type="date"
             name="reservation_date"
+            value={
+              form.reservation_date
+            }
             onChange={
               handleChange
             }
@@ -141,6 +172,9 @@ function ReservationPage() {
             type="number"
             name="duration"
             placeholder="Duration (hours)"
+            value={
+              form.duration
+            }
             onChange={
               handleChange
             }
@@ -151,6 +185,9 @@ function ReservationPage() {
             type="text"
             name="purpose"
             placeholder="Purpose"
+            value={
+              form.purpose
+            }
             onChange={
               handleChange
             }
@@ -160,13 +197,23 @@ function ReservationPage() {
             type="number"
             name="attendee_count"
             placeholder="Attendees"
+            value={
+              form.attendee_count
+            }
             onChange={
               handleChange
             }
           />
 
-          <button>
-            Confirm Booking
+          <button
+            type="submit"
+            disabled={submitting}
+          >
+            {
+              submitting
+                ? "Booking..."
+                : "Confirm Booking"
+            }
           </button>
 
         </form>

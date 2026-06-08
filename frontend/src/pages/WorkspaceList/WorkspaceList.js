@@ -48,6 +48,36 @@ function WorkspaceList() {
       )
     : desks;
 
+  const reserveDesk = (desk) => {
+    sessionStorage.setItem(
+      "reservationSelection",
+      JSON.stringify({
+        desk
+      })
+    );
+
+    navigate("/reserve", {
+      state: {
+        desk
+      }
+    });
+  };
+
+  const reserveRoom = (room) => {
+    sessionStorage.setItem(
+      "reservationSelection",
+      JSON.stringify({
+        room
+      })
+    );
+
+    navigate("/reserve", {
+      state: {
+        room
+      }
+    });
+  };
+
   return (
     <DashboardLayout>
       <div className="workspace-page">
@@ -98,13 +128,7 @@ function WorkspaceList() {
               <DeskCard
                 key={desk.id}
                 desk={desk}
-                onReserve={() =>
-                  navigate("/reserve", {
-                    state: {
-                      desk
-                    }
-                  })
-                }
+                onReserve={reserveDesk}
               />
             ))
           ) : (
@@ -124,13 +148,7 @@ function WorkspaceList() {
               <RoomCard
                 key={room.id}
                 room={room}
-                onReserve={() =>
-                  navigate("/reserve", {
-                    state: {
-                      room
-                    }
-                  })
-                }
+                onReserve={reserveRoom}
               />
             ))
           ) : (
