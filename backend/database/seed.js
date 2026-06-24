@@ -316,26 +316,6 @@ db.all("PRAGMA table_info(reservations)", [], (err, rows) => {
   console.log("RESERVATION COLUMNS:", rows);
 });
 
-db.run(`
-  UPDATE desks
-  SET status='reserved'
-  WHERE id IN (
-    SELECT desk_id
-    FROM reservations
-    WHERE desk_id IS NOT NULL
-    AND status IN ('Reserved','Approved')
-  )
-`);
 
-db.run(`
-  UPDATE rooms
-  SET status='reserved'
-  WHERE id IN (
-    SELECT room_id
-    FROM reservations
-    WHERE room_id IS NOT NULL
-    AND status IN ('Reserved','Approved')
-  )
-`);
 
 module.exports = seed
