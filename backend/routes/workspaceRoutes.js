@@ -36,22 +36,23 @@ router.get("/", (req, res) => {
 // ======================
 
 router.get("/desks", (req, res) => {
-
   db.all(
-    "SELECT * FROM desks",
+    `
+    SELECT *
+    FROM desks
+    WHERE status = 'available'
+    `,
     [],
     (err, rows) => {
-
       if (err) {
         return res.status(500).json({
           message: err.message
-        })
+        });
       }
-
-      res.json(rows)
+      res.json(rows);
     }
-  )
-})
+  );
+});
 
 // ======================
 // GET DESKS BY WORKSPACE
@@ -99,22 +100,23 @@ router.get(
 // ======================
 
 router.get("/rooms", (req, res) => {
-
   db.all(
-    "SELECT * FROM rooms",
+    `
+    SELECT *
+    FROM rooms
+    WHERE status = 'available'
+    `,
     [],
     (err, rows) => {
-
       if (err) {
         return res.status(500).json({
           message: err.message
-        })
+        });
       }
-
-      res.json(rows)
+      res.json(rows);
     }
-  )
-})
+  );
+});
 
 // ======================
 // CREATE WORKSPACE

@@ -65,6 +65,28 @@ exports.createReservation = (req, res) => {
         });
       }
 
+      if (desk_id) {
+        db.run(
+          `
+          UPDATE desks
+          SET status = 'reserved'
+          WHERE id = ?
+          `,
+          [desk_id]
+        );
+      }
+
+      if (room_id) {
+        db.run(
+          `
+          UPDATE rooms
+          SET status = 'reserved'
+          WHERE id = ?
+          `,
+          [room_id]
+        );
+      }
+
       console.log("Inserted reservation:", this.lastID);
 
       res.status(201).json({
