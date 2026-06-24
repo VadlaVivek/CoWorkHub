@@ -2,10 +2,9 @@ const db = require("../database/db")
 
 // CREATE RESERVATION
 
-exports.createReservation = (
-  req,
-  res
-) => {
+exports.createReservation = (req, res) => {
+  console.log("BODY:", req.body);
+  console.log("USER:", req.user);
 
   const {
     workspace_id,
@@ -15,143 +14,69 @@ exports.createReservation = (
     duration,
     purpose,
     attendee_count
-  } = req.body
+  } = req.body;
 
-  const user_id =
-    req.user.id
-
-  if (
-    !workspace_id ||
-    !reservation_date ||
-    !duration
-  ) {
-    return res.status(400).json({
-      message:
-        "Required fields missing"
-    })
+  if (!req.user) {
+    return res.status(401).json({
+      message: "User not authenticated"
+    });
   }
 
-  // CHECK DOUBLE BOOKING
-  const checkQuery = `
-    SELECT *
-    FROM reservations
-    WHERE reservation_date = ?
-    AND (
-      desk_id = ?
-      OR room_id = ?
-    )
-    AND status != 'Cancelled'
-  `
+  const user_id = req.user.id;
 
-  db.get(
-    checkQuery,
-    [
-      reservation_date,
+  if (!workspace_id || !reservation_date || !duration) {
+    return res.status(400).json({
+      message: "Required fields missing"
+    });
+  }
+
+  db.run(
+    `
+    INSERT INTO reservations
+    (
+      user_id,
+      workspace_id,
       desk_id,
-      room_id
+      room_id,
+      reservation_date,
+      duration,
+      purpose,
+      attendee_count,
+      status
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `,
+    [
+      user_id,
+      workspace_id,
+      desk_id || null,
+      room_id || null,
+      reservation_date,
+      duration,
+      purpose || "",
+      attendee_count || 1,
+      "Reserved"
     ],
-    (err, existing) => {
-
+    function (err) {
       if (err) {
-        return res
-          .status(500)
-          .json(err)
+        console.log("INSERT ERROR:", err);
+        return res.status(500).json({
+          message: err.message
+        });
       }
 
-      if (existing) {
-        return res
-          .status(400)
-          .json({
-            message:
-              "Desk or room already booked"
-          })
-      }
+      console.log("Inserted reservation:", this.lastID);
 
-      // CREATE
-      db.run(
-        `
-        INSERT INTO reservations
-        (
-          user_id,
-          workspace_id,
-          desk_id,
-          room_id,
-          reservation_date,
-          duration,
-          purpose,
-          attendee_count
-        )
-        VALUES
-        (?, ?, ?, ?, ?, ?, ?, ?)
-        `,
-        [
-          user_id,
-          workspace_id,
-          desk_id,
-          room_id,
-          reservation_date,
-          duration,
-          purpose,
-          attendee_count
-        ],
-        function(err) {
-
-            if (err) {
-                return res
-                .status(500)
-                .json(err)
-            }
-
-            const reservationId =
-                this.lastID
-
-            // STATUS LOG
-            db.run(
-                `
-                INSERT INTO
-                reservation_status_logs
-                (
-                reservation_id,
-                status,
-                updated_by
-                )
-                VALUES (?, ?, ?)
-                `,
-                [
-                reservationId,
-                "Reserved",
-                user_id
-                ]
-            )
-
-            // IMPORTANT:
-            // MARK DESK UNAVAILABLE
-            if (desk_id) {
-
-                db.run(
-                `
-                UPDATE desks
-                SET available = 0
-                WHERE id = ?
-                `,
-                [desk_id]
-                )
-            }
-
-            res.status(201).json({
-                message:
-                "Reservation created",
-                reservationId
-            })
-            }
-      )
+      res.status(201).json({
+        message: "Reservation created",
+        reservationId: this.lastID
+      });
     }
-  )
-}
+  );
+};
 
 // GET RESERVATIONS
 exports.getReservations = (req, res) => {
-
   let query = `
     SELECT
       r.*,
@@ -171,22 +96,21 @@ exports.getReservations = (req, res) => {
     params.push(req.user.id);
   }
 
-  db.all(
-    query,
-    params,
-    (err, rows) => {
+  console.log("QUERY:", query);
+  console.log("PARAMS:", params);
 
-      if (err) {
-        console.log(err);
-
-        return res.status(500).json({
-          message: err.message
-        });
-      }
-
-      res.json(rows);
+  db.all(query, params, (err, rows) => {
+    if (err) {
+      console.log(err);
+      return res.status(500).json({
+        message: err.message
+      });
     }
-  );
+
+    console.log("Reservations found:", rows);
+
+    res.json(rows);
+  });
 };
 
 // UPDATE STATUS

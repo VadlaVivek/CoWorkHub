@@ -303,4 +303,17 @@ VALUES
   })
 }
 
+
+db.all(
+  "SELECT name FROM sqlite_master WHERE type='table'",
+  [],
+  (err, rows) => {
+    console.log("TABLES:", rows);
+  }
+);
+
+db.all("PRAGMA table_info(reservations)", [], (err, rows) => {
+  console.log("RESERVATION COLUMNS:", rows);
+});
+
 module.exports = seed
